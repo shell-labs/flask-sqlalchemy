@@ -517,7 +517,7 @@ class _EngineConnector(object):
 
     def get_uri(self):
         if self._bind is None:
-            return self._app.config['SQLALCHEMY_DATABASE_URI']
+            return self._sa.SQLALCHEMY_DATABASE_URI or self._app.config['SQLALCHEMY_DATABASE_URI']
         binds = self._app.config.get('SQLALCHEMY_BINDS') or ()
         assert self._bind in binds, \
             'Bind %r is not specified.  Set it in the SQLALCHEMY_BINDS ' \
@@ -725,6 +725,8 @@ class SQLAlchemy(object):
     #: Customize this by passing ``query_class`` to :func:`SQLAlchemy`.
     #: Defaults to :class:`BaseQuery`.
     Query = None
+
+    SQLALCHEMY_DATABASE_URI = None
 
     def __init__(self, app=None, use_native_unicode=True, session_options=None,
                  metadata=None, query_class=BaseQuery, model_class=Model):
@@ -999,5 +1001,5 @@ class SQLAlchemy(object):
                 app = ctx.app
         return '<%s engine=%r>' % (
             self.__class__.__name__,
-            app and app.config['SQLALCHEMY_DATABASE_URI'] or None
+            app and (self.SQLALCHEMY_DATABASE_URI or app.config['SQLALCHEMY_DATABASE_URI']) or None
         )
